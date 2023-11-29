@@ -74,7 +74,7 @@ def energy_prefactor(H0, i, a):
     eps_i = H0[i,i] 
     eps_a = H0[a,a]
     
-    return 1 /  (2 * eps_i - 2 * eps_a)
+    return 1 /  ( eps_i - eps_a)
 
 def V_element(V, bra=0, ket=1):
     element = V[bra, ket]
@@ -206,7 +206,7 @@ if __name__ == "__main__":
         # print(rf"Sum of all perturbative energies (diagrams), $$\delta E$$: {diagram_sum}")
         # print(f"Energy estimate for E_GS in RS-MBPT: {H0[0,0] + diagram_sum}")
         # print("-------------------------" + "\n")
-        sums_3rdorder.append(diagram_sum + H0[0,0])
+        sums_3rdorder.append(diagram_sum + H0[0,0] + H0[1,1])
 
         # The following code is for part 7 of the midterm. 
         # 2P2H to fourth order
@@ -297,33 +297,35 @@ if __name__ == "__main__":
         
     
 
-    plt.plot(g, sums_3rdorder,"r--", g, energy_FCI_5dims, "k-")
-    plt.legend(["3rd order MBPT", "5D CI"])
-    plt.title("Groundstate energy comparison: 3rd order MBPT vs 5d CI")
-    plt.xlabel("g")
-    plt.ylabel(r"$E_{GS}$")
-    plt.show()
-    rel_diff = np.array(sums_3rdorder) - np.array(sums_4thorder)
-
-    # plt.plot(g, sums_4thorder,"r--", g, energy_FCI_5dims, "k-")
-    # plt.legend(["4th order MBPT", "5D CI"])
-    # plt.title("Groundstate energy comparison: 4th order MBPT vs 5d CI")
+    # plt.plot(g, sums_3rdorder,"r--", g, energy_FCI, "k-", g, energy_FCI_5dims, "g--")
+    # plt.legend(["3rd order MBPT", "FCI", "5D CI"])
+    # plt.title("Groundstate energy comparison: 3rd order MBPT vs CI")
     # plt.xlabel("g")
     # plt.ylabel(r"$E_{GS}$")
-    # breakpoint()
+    # plt.savefig("3rdVS5dCI.pdf")
+    # plt.show()
     
-    fig, axs = plt.subplots(2, figsize=(6,6))
-    axs[0].plot(g, sums_3rdorder, "r--", label="3rd order MBPT")
-    axs[0].plot( g, energy_FCI, "k-", label="FCI-energy")
-    axs[0].set_title("Third order MBPT against FCI energy estimates for values of g")
-    axs[0].legend()
-    axs[1].plot(g, sums_4thorder, "r--", label="4th order MBPT")
-    axs[1].plot(g, energy_FCI, "k-", label="FCI-energy")
-    axs[1].set_xlabel("g")
-    axs[0].set_ylabel("Energy")
-    axs[1].legend()
+    rel_diff_3 = np.abs(np.array(energy_FCI) - np.array(sums_3rdorder))
+    rel_diff_4 = np.abs(np.array(energy_FCI) - np.array(sums_4thorder))
+    # plt.plot(g, sums_4thorder, "r--", label="4th order MBPT")
+    # plt.plot(g, energy_FCI, "k-", label="FCI")
+    # plt.plot(g, energy_FCI_5dims, "g--", label="5D CI")
+    # plt.xlabel("g")
+    # plt.ylabel(r"$E_{GS}$")
+    # plt.title("Grounstate energy comparison: 4th order MBPT vs CI")
+    # plt.legend()
+    # plt.savefig("4thVS5dCI.pdf")
+    # plt.show()
 
-    plt.show()
+
+    plt.plot(g, rel_diff_3, label="Deviance in 3rd order MBPT")
+    plt.plot(g, rel_diff_4, label="Deviance in 4th order MBPT")
+    plt.title("The deviance from the true ground state, for 3rd and 4th order MBPT")
+    plt.xlabel("g")
+    plt.ylabel(r"$E_{GS} - E_{GSapprox}$")
+    plt.legend()
+    plt.savefig("energyerror_comaprison.pdf")
+
     exit()
 
     plt.plot(g, sums)
