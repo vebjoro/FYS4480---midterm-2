@@ -157,6 +157,7 @@ if __name__ == "__main__":
     sums_2ndorder = []
     sums_3rdorder = []
     sums_4thorder = []
+    E0_ref = []
     for g_val in g:         
         # V_old, H0_old = H_sep(g=g_val)
         e, h_HF = task_5(g_val)
@@ -165,6 +166,7 @@ if __name__ == "__main__":
         H0 = np.diag(np.array([0,2,4,6])) 
         # H0 = h_HF 
         diagram_0 = - g_val
+        E0_ref.append(H0[0, 0]+H0[1, 1] - g_val)
 
         print(f"Calculating MBPT energy diagrams for g = {g_val}")
         diagram_1_2nd = diagrammatic_factors(nh=2,nl=2,nep=2) * (
@@ -176,7 +178,7 @@ if __name__ == "__main__":
             for i in [0,1] )
         )
 
-        sums_2ndorder.append(diagram_1_2nd)
+        sums_2ndorder.append(diagram_1_2nd + H0[0, 0] + H0[1, 1] - g_val)
 
         # diagram_1_other = 0
         # for i in [0,1]:
@@ -306,10 +308,14 @@ if __name__ == "__main__":
 
         sums_4thorder.append(sum_2P2H_4th + sum_4P4H_4th + diagram_sum + H0[0,0] + H0[1,1])
 
-    
-    plt.plot(g, )
-    plt.plot(g, sums_3rdorder,"r--", g, energy_FCI, "k-", g, energy_FCI_5dims, "g--")
-    plt.legend(["3rd order MBPT", "FCI", "5D CI"])
+    sums_2ndorder = np.array(sums_2ndorder)
+    sums_3rdorder = np.array(sums_3rdorder)
+    sums_4thorder = np.array(sums_4thorder)
+    E0_ref = np.array(E0_ref)
+
+
+    plt.plot(g, sums_2ndorder - E0_ref, "b--", g, sums_3rdorder - E0_ref,"r--", g, energy_FCI- E0_ref, "k-", g, energy_FCI_5dims-E0_ref, "g--")
+    plt.legend(["2nd orded MBPT", "3rd order MBPT", "FCI", "5D CI"])
     plt.title("Groundstate energy comparison: 3rd order MBPT vs CI")
     plt.xlabel("g")
     plt.ylabel(r"$E_{GS}$")
@@ -335,7 +341,7 @@ if __name__ == "__main__":
     plt.xlabel("g")
     plt.ylabel(r"$E_{GS} - E_{GSapprox}$")
     plt.legend()
-    plt.savefig("energyerror_comaprison.pdf")
+    #plt.savefig("energyerror_comaprison.pdf")
 
     exit()
 
