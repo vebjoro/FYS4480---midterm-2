@@ -76,13 +76,22 @@ def energy_prefactor(H0, i, a):
     
     return 1 /  ( eps_i - eps_a)
 
+
+def energy_prefactor_4P4H(H0, i, j, a, b):
+    eps_i = H0[i, i]
+    eps_j = H0[j, j]
+    eps_a = H0[a, a]
+    eps_b = H0[b, b]
+
+    return 1/(eps_i + eps_j - eps_a - eps_b)
+
 def V_element(V, bra=0, ket=1):
     element = V[bra, ket]
 
     return element
  
-def diagrammatic_factors(nh, nl, nep):
-    from_nep = (1 / 2) ** nep
+def diagrammatic_factors(nh, nl, nep, ):
+    from_nep = (1) ** nep #this factor cancels free sums, which we don't do
     from_nl = (-1) ** nl
     from_nh = (-1) ** nh
     
@@ -145,7 +154,7 @@ if __name__ == "__main__":
     # plt.savefig("FCIvsHF.pdf")
     # plt.show()
     
-    
+    sums_2ndorder = []
     sums_3rdorder = []
     sums_4thorder = []
     for g_val in g:         
@@ -158,7 +167,7 @@ if __name__ == "__main__":
         diagram_0 = - g_val
 
         print(f"Calculating MBPT energy diagrams for g = {g_val}")
-        diagram_1_3rd = diagrammatic_factors(nh=2,nl=2,nep=2) * (
+        diagram_1_2nd = diagrammatic_factors(nh=2,nl=2,nep=2) * (
             sum(sum(
                 V_element(V=V, bra=i, ket=a) * V_element(V=V, bra=a, ket=i)
                     * energy_prefactor(H0=H0, i=i, a=a) 
@@ -166,7 +175,9 @@ if __name__ == "__main__":
             ) 
             for i in [0,1] )
         )
-        
+
+        sums_2ndorder.append(diagram_1_2nd)
+
         # diagram_1_other = 0
         # for i in [0,1]:
         #     for a in [2,3]:
@@ -197,7 +208,7 @@ if __name__ == "__main__":
                     * energy_prefactor(H0=H0, i=i, a=a) ** 2 for a in [2,3]
             ) for i in [0,1] )
         )
-        diagram_sum = diagram_0 + diagram_1_3rd + diagram_4_3rd + diagram_5_3rd + diagram_8_3rd
+        diagram_sum = diagram_0 + diagram_1_2nd + diagram_4_3rd + diagram_5_3rd + diagram_8_3rd
         # print(f"Energy found for diagram 1: {diagram_1_3rd}")
         # print(f"Energy found for diagram 4: {diagram_4_3rd}")
         # print(f"Energy found for diagram 5: {diagram_5_3rd}")
@@ -253,7 +264,7 @@ if __name__ == "__main__":
         diagram_33 = diagrammatic_factors(nh=4, nl=4, nep=4) * (
             sum(sum(sum(sum(
                 V_element(V, i, a) * V_element(V, j, b) * V_element(V, a, i) * V_element(V, b, j)
-                * energy_prefactor(H0, i=i, a=a) * (energy_prefactor(H0, i=i, a=a) + energy_prefactor(H0, i=j, a=b)) * energy_prefactor(H0, i=j, a=b)
+                * energy_prefactor(H0, i=i, a=a) * energy_prefactor_4P4H(H0, i = i, j=j, a=a, b=b) * energy_prefactor(H0, i=j, a=b)
             for i in [0,1])
             for j in [0,1])
             for a in [2,3])
@@ -264,7 +275,7 @@ if __name__ == "__main__":
         diagram_36 = diagrammatic_factors(nh=4, nl=0, nep=4) * (
             sum(sum(sum(sum(
                 V_element(V, i, a) * V_element(V, j, b) * V_element(V, a, j) * V_element(V, b, i)
-                * energy_prefactor(H0, i=i, a=a) * (energy_prefactor(H0, i=i, a=a) + energy_prefactor(H0, i=j, a=b)) * energy_prefactor(H0, i=i, a=b)
+                * energy_prefactor(H0, i=i, a=a) *  energy_prefactor_4P4H(H0, i = i, j=j, a=a, b=b) * energy_prefactor(H0, i=i, a=b)
             for i in [0,1])
             for j in [0,1])
             for a in [2,3])
@@ -274,7 +285,7 @@ if __name__ == "__main__":
         diagram_37 = diagrammatic_factors(nh=4, nl=0, nep=4) * (
             sum(sum(sum(sum(
                 V_element(V, i, a) * V_element(V, j, b) * V_element(V, b, i) * V_element(V, a, j)
-                * energy_prefactor(H0, i=i, a=a) * (energy_prefactor(H0, i=i, a=a) + energy_prefactor(H0, i=j, a=b)) * energy_prefactor(H0, i=j, a=a)
+                * energy_prefactor(H0, i=i, a=a) *  energy_prefactor_4P4H(H0, i = i, j=j, a=a, b=b) * energy_prefactor(H0, i=j, a=a)
             for i in [0,1])
             for j in [0,1])
             for a in [2,3])
@@ -284,7 +295,7 @@ if __name__ == "__main__":
         diagram_41 = diagrammatic_factors(nh=4, nl=4, nep=4) * (
             sum(sum(sum(sum(
                 V_element(V, i, a) * V_element(V, j, b) * V_element(V, b, j) * V_element(V, a, i)
-                * energy_prefactor(H0, i=i, a=a) * (energy_prefactor(H0, i=i, a=a) + energy_prefactor(H0, i=j, a=b)) * energy_prefactor(H0, i=i, a=a)
+                * energy_prefactor(H0, i=i, a=a) *  energy_prefactor_4P4H(H0, i = i, j=j, a=a, b=b) * energy_prefactor(H0, i=i, a=a)
             for i in [0,1])
             for j in [0,1])
             for a in [2,3])
@@ -294,16 +305,16 @@ if __name__ == "__main__":
         sum_4P4H_4th = diagram_36 + diagram_33 + diagram_37 + diagram_41
 
         sums_4thorder.append(sum_2P2H_4th + sum_4P4H_4th + diagram_sum + H0[0,0] + H0[1,1])
-        
-    
 
-    # plt.plot(g, sums_3rdorder,"r--", g, energy_FCI, "k-", g, energy_FCI_5dims, "g--")
-    # plt.legend(["3rd order MBPT", "FCI", "5D CI"])
-    # plt.title("Groundstate energy comparison: 3rd order MBPT vs CI")
-    # plt.xlabel("g")
-    # plt.ylabel(r"$E_{GS}$")
-    # plt.savefig("3rdVS5dCI.pdf")
-    # plt.show()
+    
+    plt.plot(g, )
+    plt.plot(g, sums_3rdorder,"r--", g, energy_FCI, "k-", g, energy_FCI_5dims, "g--")
+    plt.legend(["3rd order MBPT", "FCI", "5D CI"])
+    plt.title("Groundstate energy comparison: 3rd order MBPT vs CI")
+    plt.xlabel("g")
+    plt.ylabel(r"$E_{GS}$")
+    plt.savefig("3rdVS5dCI.pdf")
+    plt.show()
     
     rel_diff_3 = np.abs(np.array(energy_FCI) - np.array(sums_3rdorder))
     rel_diff_4 = np.abs(np.array(energy_FCI) - np.array(sums_4thorder))
