@@ -1,4 +1,4 @@
-# FYS4480---midterm-2
+# We easily see
 Code for second midterm in FYS4480
 
 Most script names are self explanatory. 
